@@ -131,7 +131,12 @@ knownDiseases?: boolean;
   @IsOptional()
   profileImage?: any;
 
-
+@ApiProperty({ description: 'Dados de localização do profissional', required: false , type: CreateLocationDto,example: {
+    street: 'Avenida Principal, nº 123',
+    cityId: '76c1e5b4-2f33-4b90-8f83-874cbd02d9e5',
+    districtId: 'e4f1c2d3-4b5a-6789-0abc-def123456789',
+  
+  } })
   @ValidateNested()
   @Type(() => CreateLocationDto)
   location?: CreateLocationDto;

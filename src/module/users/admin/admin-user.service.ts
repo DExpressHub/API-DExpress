@@ -231,6 +231,13 @@ export class AdminUserService {
     const adminDelete = await this.prisma.adminUser.findUnique({ where: { id } });
     if (!adminDelete) throw new NotFoundException(`Utilizador com o ID "${id}" não encontrado`);
     if (adminDelete?.isRoot) throw new NotFoundException(`Utilizador "${adminDelete?.name}" não pode ser deletado`);
+    if (adminDelete?.id === deletor) throw new NotFoundException(`Você não pode se auto deletar`);
+    if(adminDelete?.profileId){
+      const CurrentUser = await this.prisma.adminUser.findUnique({ where: { id: deletor } });
+    if(adminDelete.profileId === CurrentUser?.profileId && CurrentUser?.isRoot === false){
+        throw new NotFoundException(`Somente outro Admin Geral pode deletar este usuário`);
+      }
+    }
 
     const deleted = await this.prisma.adminUser.delete({ where: { id } });
 
