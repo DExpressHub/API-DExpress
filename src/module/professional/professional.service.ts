@@ -216,11 +216,54 @@ export class ProfessionalService {
         location: { include: { city: true, district: true } },
         desiredPosition: true,
         gender: true,
-        jobApplication: true,
+      
         experienceLevel: true,
         maritalStatus: true,
         highestDegree: true,
         availability: true,
+        contract:{
+          select: {
+            id: true,
+            status: true,
+            contractNumber: true,
+            startDate: true,
+            endDate: true,
+            clientType: true,
+            individualClient: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phoneNumber: true
+              }
+            },
+        
+          }
+        },
+        contractPackegeProfissional:{
+          include:{
+           contract: {
+  select: {
+    id: true,
+    status: true,
+    contractNumber: true,
+    startDate: true,
+    endDate: true,
+    clientType: true,
+    individualClient: {
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phoneNumber: true
+      }
+    },
+    companyClient: true
+  }
+}
+}
+        },
+       
         
         ProfessionalExperience: true,
         professionalCourses: { include: { course: true } },
