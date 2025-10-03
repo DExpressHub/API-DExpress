@@ -12,6 +12,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsValidEmail } from 'src/common/validators/is-valid-email';
+import { CreateLocationDto } from 'src/module/shared/location/dto/create-location.dto';
 
 export class CreateProfessionalDto {
   @ApiProperty({ example: 'Maria Joaquina', description: 'Nome completo do profissional' })
@@ -67,7 +68,8 @@ export class CreateProfessionalDto {
 
   @ApiProperty({ example: '76c1e5b4-2f33-4b90-8f83-874cbd02d9e5', description: 'ID da localização atual' })
   @IsUUID()
-  locationId: string;
+  @IsOptional()
+  locationId?: string;
 
   @ApiProperty({ example: '76c1e5b4-2f33-4b90-8f83-874cbd02d9e5', description: 'ID do gênero' })
   @IsUUID()
@@ -128,4 +130,9 @@ knownDiseases?: boolean;
  
   @IsOptional()
   profileImage?: any;
+
+
+  @ValidateNested()
+  @Type(() => CreateLocationDto)
+  location?: CreateLocationDto;
 }

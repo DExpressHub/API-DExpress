@@ -11,47 +11,75 @@ import { CreateProfessionalExperienceDto } from './dto/create-professional-exper
 export class ProfessionalService {
   constructor(private readonly prisma: PrismaService) {}
 
+async create(createProfessionalDto: CreateProfessionalDto) {
+  const {
+    courseIds = [],
+    languageIds = [],
+    skillIds = [],
+    experienceIds = [],
+    locationId,
+    location,
+    ...professionalData
+  } = createProfessionalDto;
 
-  async create(createProfessionalDto: CreateProfessionalDto) {
-    const {
-      courseIds,
-      languageIds,
-      skillIds,
-      experienceIds,
-      ...professionalData
-    } = createProfessionalDto;
-   
-    
-      // 3. Verificação de usuário existente
-      const existingUser = await this.findByEmail(createProfessionalDto.email);
-      if (existingUser) {
-        throw new BadRequestException('E-mail já cadastrado.');
-      }
-    
+  return this.prisma.$transaction(async (tx) => {
+    // 1. Verificação de usuário existente
+    const existingUser = await this.findByEmail(professionalData.email);
+    if (existingUser) {
+      throw new BadRequestException('E-mail já cadastrado.');
+    }
 
-    return this.prisma.professional.create({
+    // 2. Criação de endereço se necessário
+    let finalLocationId = locationId;
+    if (!finalLocationId && location) {
+      const newLocation = await tx.location.create({
+        data: {
+          cityId: location.cityId || 'N/A',
+          districtId: location.districtId || 'N/A',
+          street: location.street || 'N/A',
+        },
+      });
+      finalLocationId = newLocation.id;
+    }
+    if (!finalLocationId) {
+  throw new BadRequestException('Localização obrigatória.');
+}
+
+    // 3. Criação do Professional com relações
+    const professional = await tx.professional.create({
       data: {
         ...professionalData,
-        
-        professionalCourses: courseIds && courseIds.length > 0 ? {
-          createMany: {
-            data: courseIds.map(courseId => ({ courseId })),
-          },
-        } : undefined,
-        professionalLanguages: languageIds && languageIds.length > 0 ? {
-          createMany: {
-            data: languageIds.map(languageId => ({ languageId })),
-          },
-        } : undefined,
-        professionalSkills: skillIds && skillIds.length > 0 ? {
-          createMany: {
-            data: skillIds.map(skillId => ({ skillId })),
-          },
-        } : undefined,
-        ProfessionalExperience: experienceIds && experienceIds.length > 0 ? {
-          // Para um relacionamento muitos-para-muitos direto, a sintaxe `connect` funciona
-          connect: experienceIds.map(id => ({ id })),
-        } : undefined,
+        locationId: finalLocationId,
+
+        professionalCourses: courseIds.length
+          ? {
+              createMany: {
+                data: courseIds.map((courseId) => ({ courseId })),
+              },
+            }
+          : undefined,
+
+        professionalLanguages: languageIds.length
+          ? {
+              createMany: {
+                data: languageIds.map((languageId) => ({ languageId })),
+              },
+            }
+          : undefined,
+
+        professionalSkills: skillIds.length
+          ? {
+              createMany: {
+                data: skillIds.map((skillId) => ({ skillId })),
+              },
+            }
+          : undefined,
+
+        ProfessionalExperience: experienceIds.length
+          ? {
+              connect: experienceIds.map((id) => ({ id })),
+            }
+          : undefined,
       },
       include: {
         location: { include: { city: true, district: true } },
@@ -60,7 +88,6 @@ export class ProfessionalService {
         jobApplication: true,
         experienceLevel: true,
         availability: true,
-        
         ProfessionalExperience: true,
         professionalCourses: { include: { course: true } },
         professionalLanguages: { include: { language: true } },
@@ -69,7 +96,11 @@ export class ProfessionalService {
         highestDegree: true,
       },
     });
-  }
+
+    return professional;
+  });
+}
+
 
   // ... (findAll method - remains unchanged as it's correct for its purpose) ...
 
@@ -292,6 +323,8 @@ export class ProfessionalService {
       languageIds,
       skillIds,
       experienceIds,
+      locationId,
+      location,
       ...professionalData
     } = updateProfessionalDto;
 
