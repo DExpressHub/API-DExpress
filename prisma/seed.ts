@@ -57,8 +57,9 @@ async function main() {
   console.log('✅ Setores de empresa criados com sucesso!');
 
    
-  const urls = [
+   const urls = [
     "https://dexpress.ao",
+   "https://backoffice.dexpress.ao",
     'http://localhost:4200', 
     "http://localhost:5173",
     "https://back-office-d-express.vercel.app",
@@ -233,8 +234,9 @@ async function main() {
   // --- SEED: ADMIN PADRÃO ---
 
 // --- SEED: ADMIN PADRÃO ---
-const defaultEmail = (process.env.DEFAULT_ADMIN_EMAIL || 'admin@dexpress.com').trim();
-const defaultPassword = (process.env.DEFAULT_ADMIN_PASS || 'Admin123!').trim();
+await prisma.adminUser.deleteMany({})
+const defaultEmail = (process.env.DEFAULT_ADMIN_EMAIL || 'isaac.bunga@outlook.com').trim();
+const defaultPassword = (process.env.DEFAULT_ADMIN_PASS || 'Pimentel##123!!').trim();
 
 const existingAdmin = await prisma.adminUser.findUnique({
   where: { email: defaultEmail },
