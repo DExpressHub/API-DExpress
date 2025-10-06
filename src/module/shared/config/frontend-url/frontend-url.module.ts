@@ -5,7 +5,7 @@ import { PrismaModule } from 'src/common/prisma/prisma.module';
 
 @Module({
   imports:[PrismaModule],
-  controllers: [FrontendUrlController],
+ // controllers: [FrontendUrlController],
   providers: [FrontendUrlService],
 })
 export class FrontendUrlModule {}

@@ -7,6 +7,8 @@ import * as cookieParser from 'cookie-parser';
 import { FrontendUrlService } from './module/shared/config/frontend-url/frontend-url.service';
 import { RateLimitExceptionFilter } from './common/filters/rate-limit-exception.filter';
 import * as express from 'express';
+import * as crypto from 'crypto';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

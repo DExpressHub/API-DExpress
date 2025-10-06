@@ -43,6 +43,10 @@ import { TemplateContractModule } from './module/contract/model-contract/templat
 import { ScheduleModule } from './module/shared/schedule/schedule.module';
 import { AuditLogModule } from './module/shared/auditLog/auditLog.module';
 
+import { NotificationModule } from './module/shared/notification/notification.module';
+
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -108,7 +112,8 @@ import { AuditLogModule } from './module/shared/auditLog/auditLog.module';
     ContractModule,
     NewsletterSubscriberModule,
     TemplateContractModule,
-       AuditLogModule, 
+       AuditLogModule,
+       NotificationModule, 
   ],
   controllers: [AppController, EmailController,FileController],
   providers: [
@@ -117,6 +122,7 @@ import { AuditLogModule } from './module/shared/auditLog/auditLog.module';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+  
   ],
 })
 
