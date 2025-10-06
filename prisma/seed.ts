@@ -59,9 +59,7 @@ async function main() {
    
    const urls = [
     "https://dexpress.ao",
-   "https://backoffice.dexpress.ao",
-    'http://localhost:4200', 
-    "http://localhost:5173",
+    "https://backoffice.dexpress.ao",
     "https://back-office-d-express.vercel.app",
     "https://web-site-d-express.vercel.app"
   ];
@@ -234,7 +232,6 @@ async function main() {
   // --- SEED: ADMIN PADRÃO ---
 
 // --- SEED: ADMIN PADRÃO ---
-await prisma.adminUser.deleteMany({})
 const defaultEmail = (process.env.DEFAULT_ADMIN_EMAIL || 'isaac.bunga@outlook.com').trim();
 const defaultPassword = (process.env.DEFAULT_ADMIN_PASS || 'Pimentel##123!!').trim();
 
