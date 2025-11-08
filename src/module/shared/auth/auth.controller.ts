@@ -19,12 +19,10 @@ import { JwtAuthGuard } from 'src/common';
 
 const isProduction = process.env.COOKIES === 'production';
 
-
-
 @ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   async login(
@@ -60,14 +58,12 @@ export class AuthController {
   ) {
     const refreshToken = req.cookies?.refresh_token;
 
-
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token não fornecido');
     }
 
-    const { accessToken } = await this.authService.refreshAccessToken(
-      refreshToken,
-    );
+    const { accessToken } =
+      await this.authService.refreshAccessToken(refreshToken);
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,
@@ -76,8 +72,6 @@ export class AuthController {
       sameSite: (isProduction ? 'None' : 'Lax') as 'none' | 'lax' | 'strict',
       maxAge: 60 * 60 * 1000,
     });
-
-
 
     return { success: true, accessToken };
   }
@@ -105,11 +99,12 @@ export class AuthController {
     return { valid: true, user: req.user };
   }
   @Post('forgot-password')
-  async forgotPassword(
-    @Body('email') email: string,
-    @Req() req: any
-  ) {
-    const originDomain = req.headers['origin'] || req.headers['referer'] || req.headers['host'] || 'dexpress.ao';
+  async forgotPassword(@Body('email') email: string, @Req() req: any) {
+    const originDomain =
+      req.headers['origin'] ||
+      req.headers['referer'] ||
+      req.headers['host'] ||
+      'dexpress.ao';
     return this.authService.forgotPassword(email, originDomain);
   }
   @Patch('reset-password/:token')
@@ -119,5 +114,4 @@ export class AuthController {
   ) {
     return this.authService.resetPassword(token, password);
   }
-
 }

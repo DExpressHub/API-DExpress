@@ -1,26 +1,42 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwtService: JwtService, private readonly mailerService: MailerService) { }
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+    private readonly mailerService: MailerService,
+  ) {}
   async validateUser(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
-      where: { email, isActive: true, }, include: {
-        clientProfile: true
-      }
+      where: { email, isActive: true },
+      include: {
+        clientProfile: true,
+      },
     });
     if (!user) throw new UnauthorizedException('Usuário não encontrado');
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new UnauthorizedException('Credenciais inválidas');
+    if (!isPasswordValid)
+      throw new UnauthorizedException('Credenciais inválidas');
     return user;
   }
   async login(user: any) {
-    const payload = { id: user.id, email: user.email, type: user.type, isActive: user.isActive };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      type: user.type,
+      isActive: user.isActive,
+    };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
@@ -31,7 +47,6 @@ export class AuthService {
       secret: process.env.JWT_REFRESH_SECRET,
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
     });
-
 
     return {
       accessToken,
@@ -73,30 +88,35 @@ export class AuthService {
     }
   }
 
- async forgotPassword(email: string, origin: string) {
-    const user = await this.prisma.user.findUnique({ where: { email, isActive: true, } });
+  async forgotPassword(email: string, origin: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email, isActive: true },
+    });
     if (!user) {
       throw new NotFoundException('Usuário não encontrado.');
     }
 
     // Gerar token JWT com expiração
     const payload = { sub: user.id, email: user.email };
-    const resetToken = this.jwtService.sign(
-      payload,
-      { expiresIn: '1h' }
-    );
-   
-    await this.prisma.user.update(user.id, { resetToken });
+    const resetToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken },
+    });
 
     // Enviar e-mail
-    await this.sendPasswordResetEmail(email, resetToken, origin);
+    await this.sendPasswordResetEmail(email, resetToken);
 
     return { message: 'Link de recuperação enviado com sucesso.' };
   }
   async resetPassword(token: string, newPassword: string) {
     try {
       const payload = this.jwtService.verify(token);
-      const user = await this.prisma.user.findUnique({ where: { id: payload.sub} });
+      console.log(payload);
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
       if (!user) {
         throw new NotFoundException('Usuário não encontrado.');
       }
@@ -106,9 +126,12 @@ export class AuthService {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await this.prisma.user.update(user.id, {
-        password: hashedPassword,
-        resetToken: null,
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetToken: null,
+        },
       });
 
       return { message: 'Senha redefinida com sucesso.' };
@@ -116,8 +139,8 @@ export class AuthService {
       throw new BadRequestException('Token inválido ou expirado.');
     }
   }
-  private async sendPasswordResetEmail(email: string, resetToken: string, originDomain: string) {
-    const resetUrl = `${originDomain}/reset-password?token=${resetToken}`;
+  private async sendPasswordResetEmail(email: string, resetToken: string) {
+    const resetUrl = `${process.env.PORTAL_URL}/recuperar-senha/redefinir?token=${resetToken}`;
 
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; background: #f7f9fc; border-radius: 8px; padding: 20px; color: #333;">
@@ -135,7 +158,7 @@ export class AuthService {
         <p style="font-size: 16px;">
           Clique no botão abaixo para criar uma nova senha:
         </p>
-        
+
         <div style="text-align: center; margin: 25px 0;">
           <a href="${resetUrl}"
              style="display: inline-block; background-color: #030c27ff; color: #ffffff; padding: 14px 28px;
@@ -171,8 +194,4 @@ export class AuthService {
       html: htmlContent,
     });
   }
-
-
-
-
 }
