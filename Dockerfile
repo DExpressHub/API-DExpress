@@ -12,7 +12,7 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 9696
 
 # Se estiver em dev, usamos o start:dev (hot reload)
 CMD ["sh", "-c", "if [ \"$NODE_ENV\" = \"development\" ]; then npm run start:dev; else npm run start:prod; fi"]

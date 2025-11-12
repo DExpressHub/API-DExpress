@@ -31,7 +31,7 @@ services:
     container_name: dev_app
     command: npm run start:dev
     ports:
-      - "3000:3000"
+      - "9696:9696"
     depends_on:
       - postgres
     env_file:
