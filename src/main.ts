@@ -7,7 +7,7 @@ import * as cookieParser from 'cookie-parser';
 import { FrontendUrlService } from './module/shared/config/frontend-url/frontend-url.service';
 import { RateLimitExceptionFilter } from './common/filters/rate-limit-exception.filter';
 import * as express from 'express';
-import * as crypto from 'crypto';
+
 
 
 async function bootstrap() {
@@ -71,6 +71,6 @@ async function bootstrap() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 9696);
 }
 bootstrap();

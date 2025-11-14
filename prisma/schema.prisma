@@ -642,6 +642,8 @@ model User {
   email         String          @unique
   //nif            String?      @unique
   password      String
+  resetToken    String?
+  resetTokenExpires DateTime?
   isActive      Boolean         @default(true)
   type          UserType        @default(INDIVIDUAL)
   avatar        String          @default("user.png")
@@ -673,7 +675,7 @@ model AdminUser {
   isRoot               Boolean                @default(false)
 
   auditLog AuditLog[]
-
+  passwordResetToken PasswordResetToken[]
 }
 
 // Novo modelo Profile para gerir perfis de utilizador.
@@ -704,6 +706,17 @@ model SecuritySettings {
   lastPasswordChange DateTime?
   adminUser          AdminUser @relation(fields: [userId], references: [id])
 }
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  adminUser AdminUser @relation(fields: [userId], references: [id])
+}
+
 model Notification {
   id          String     @id @default(uuid())
   clientProfile        ClientProfile?  @relation(fields: [clientProfileId], references: [id])
